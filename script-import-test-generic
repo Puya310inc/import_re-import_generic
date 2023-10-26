@@ -9,7 +9,7 @@ ORG_ID = "" #Org ID (this will need to be done/run for each org)
 integrationId = "" #SCM integrationID (get from integration page) this should be the integration ID for the integration you want to import FROM 
 fork = 'false' #wip 
 
-target_url = f"https://api.snyk.io/rest/orgs/{ORG_ID}/targets?version=2023-10-13%7Ebeta&origin=github"
+target_url = f"https://api.snyk.io/rest/orgs/{ORG_ID}/targets?version=2023-10-13%7Ebeta&origin=github&limit=100"
 branch_url = f"https://api.snyk.io/rest/orgs/{ORG_ID}/projects?origins=github&version=2023-10-13%7Ebeta&limit=100" #wip 
 
 def get_branch_name(branch_url, display_name):
