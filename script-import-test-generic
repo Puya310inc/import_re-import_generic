@@ -11,7 +11,7 @@ fork = 'false' #wip
 
 target_url = f"https://api.snyk.io/rest/orgs/{ORG_ID}/targets?version=2023-10-13%7Ebeta&origin=github"
 import_url = f"https://api.snyk.io/v1/org/{ORG_ID}/integrations/{integrationId}/import"
-branch_url = f"https://api.snyk.io/rest/orgs/{ORG_ID}/projects?origins=github&version=2023-10-13%7Ebeta" #wip 
+branch_url = f"https://api.snyk.io/rest/orgs/{ORG_ID}/projects?origins=github&version=2023-10-13%7Ebeta&limit=100" #wip 
 
 def get_branch_name(branch_url, display_name):
     try:
