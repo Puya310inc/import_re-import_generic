@@ -1,0 +1,110 @@
+import requests
+import time
+import json
+
+#this script will output a JSON in the format that can be used with Snyk api-import-tool to import existing projects 
+
+SNYK_TOKEN = "" #your snyk API token (account settings on snyk UI)
+ORG_ID = "" #Org ID (this will need to be done/run for each org)
+integrationId = "" #SCM integrationID (get from integration page) for integratino you want to import 
+fork = 'false' #wip 
+
+target_url = f"https://api.snyk.io/rest/orgs/{ORG_ID}/targets?version=2023-10-13%7Ebeta&origin=github"
+import_url = f"https://api.snyk.io/v1/org/{ORG_ID}/integrations/{integrationId}/import"
+branch_url = f"https://api.snyk.io/rest/orgs/{ORG_ID}/projects?origins=github&version=2023-10-13%7Ebeta" #wip 
+
+def get_branch_name(branch_url, display_name):
+    try:
+        headers = {
+            'Accept': 'application/vnd.api+json',
+            'Authorization': f'token {SNYK_TOKEN}'
+                }
+        response = requests.get(branch_url, headers=headers)
+
+        if response.status_code == 200:
+            data = response.json()
+
+            # create dictionairy of unique name (in format of owner/name)
+            unique_data = {}
+
+            # Iterate through the 'data' array (use value before ':', since 'name' is like owner/name:projectname)
+            for item in data['data']:
+                name = item['attributes']['name']
+                # Extract the part before ":"
+                name_parts = name.split(':')
+                len(name_parts) == 2
+                newName = name_parts[0]
+                
+
+                target_reference = item['attributes']['target_reference'] 
+
+                # sort it by unique values, and store 'newName' and 'target_reference' as a string
+                if newName not in unique_data:
+                    unique_data[newName] = target_reference
+
+            # Create a list of dictionaries for each unique 'newName' and its corresponding 'target_reference' string
+            result = [{'newName': name, 'target_reference': target_ref} for name, target_ref in unique_data.items()]
+
+            # Compare 'newName' with 'display_name' and set 'branch1' if they match -
+            branch1 = None
+            for entry in result:
+                if entry['newName'] == display_name:
+                    branch1 = entry['target_reference']
+
+            return branch1
+        else:
+            print("API request failed with status code:", response.status_code)
+            return None, None
+    except Exception as e:
+        print("An error occurred:", str(e))
+        return None, None
+   
+all_targets = []
+
+headers = {
+    'Accept': 'application/vnd.api+json',
+    'Authorization': f'token {SNYK_TOKEN}'
+    }
+res = requests.request("GET", target_url, headers=headers).json()
+all_targets = res['data']  
+new_targets = []
+
+#get project attributes
+for project in all_targets:
+
+    attributes = project.get('attributes', {})
+    display_name = attributes.get('displayName', '')
+    branch = get_branch_name(branch_url, display_name)
+    print(display_name)
+    split_name = display_name.split('/')
+
+    if len(split_name) < 2:
+        print(f"Invalid format for the repo: {display_name}")
+        continue
+
+    owner, name = split_name[:2]
+  
+    target = {
+        "fork": fork,
+        "name": name,
+        "owner": owner,
+        "branch": branch
+    }
+    request_data = {
+        "target": target,
+        "integrationId": integrationId,
+        "orgId": ORG_ID
+    }
+    new_targets.append(request_data)
+
+result_final = {
+"targets": new_targets
+}
+
+#save as json
+with open('test1.json', 'w') as json_file:
+    json.dump(result_final, json_file, indent=4)
+
+print("Data saved to test1.json") 
+
+
