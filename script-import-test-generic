@@ -6,11 +6,10 @@ import json
 
 SNYK_TOKEN = "" #your snyk API token (account settings on snyk UI)
 ORG_ID = "" #Org ID (this will need to be done/run for each org)
-integrationId = "" #SCM integrationID (get from integration page) for integratino you want to import 
+integrationId = "" #SCM integrationID (get from integration page) this should be the integration ID for the integration you want to import FROM 
 fork = 'false' #wip 
 
 target_url = f"https://api.snyk.io/rest/orgs/{ORG_ID}/targets?version=2023-10-13%7Ebeta&origin=github"
-import_url = f"https://api.snyk.io/v1/org/{ORG_ID}/integrations/{integrationId}/import"
 branch_url = f"https://api.snyk.io/rest/orgs/{ORG_ID}/projects?origins=github&version=2023-10-13%7Ebeta&limit=100" #wip 
 
 def get_branch_name(branch_url, display_name):
